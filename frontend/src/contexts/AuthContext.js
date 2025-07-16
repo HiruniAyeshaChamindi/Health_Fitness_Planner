@@ -106,8 +106,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
+      console.log('Attempting to register user:', userData);
       dispatch({ type: 'SET_LOADING', payload: true });
       const response = await authAPI.register(userData);
+      console.log('Registration response:', response);
       dispatch({ 
         type: 'LOGIN_SUCCESS', 
         payload: {
@@ -117,6 +119,8 @@ export const AuthProvider = ({ children }) => {
       });
       return { success: true };
     } catch (error) {
+      console.error('Registration error:', error);
+      console.error('Error response:', error.response);
       dispatch({ type: 'AUTH_ERROR' });
       return { 
         success: false, 
