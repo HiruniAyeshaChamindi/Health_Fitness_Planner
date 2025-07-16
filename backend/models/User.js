@@ -192,19 +192,19 @@ userSchema.methods.calculateDailyWaterTarget = function() {
   return baseWater + activityBonus[this.activityLevel];
 };
 
-// Update calculated values before saving
-userSchema.pre('save', function(next) {
+// Update calculated values and hash password before saving
+userSchema.pre('save', async function(next) {
+  // Update calculated values
   this.bmr = this.calculateBMR();
   this.tdee = this.calculateTDEE();
   this.dailyCalorieTarget = this.calculateDailyCalorieTarget();
   this.dailyWaterTarget = this.calculateDailyWaterTarget();
-  next();
-});
-
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
+  
+  // Hash password if modified
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
+  
   next();
 });
 

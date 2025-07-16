@@ -115,8 +115,10 @@ const registerUser = async (req, res) => {
 // Login User
 const loginUser = async (req, res) => {
   try {
+    console.log('Login request received:', req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Login validation errors:', errors.array());
       return res.status(400).json({
         success: false,
         message: 'Validation errors',
@@ -125,19 +127,25 @@ const loginUser = async (req, res) => {
     }
 
     const { email, password } = req.body;
+    console.log('Attempting login for email:', email);
 
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('User not found for email:', email);
       return res.status(400).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
 
+    console.log('User found:', user.email);
+
     // Check password
     const isMatch = await user.comparePassword(password);
+    console.log('Password match result:', isMatch);
     if (!isMatch) {
+      console.log('Password does not match for user:', email);
       return res.status(400).json({
         success: false,
         message: 'Invalid credentials'
