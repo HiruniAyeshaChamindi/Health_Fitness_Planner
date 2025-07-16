@@ -101,13 +101,13 @@ Create a `.env` file in the backend directory:
 ```env
 NODE_ENV=development
 PORT=5000
-MONGODB_URI=mongodb+srv://sandali:fitness123@@cluster0.bluembl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://sandali:sandali123@cluster0.0nq0cis.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=fitgenie_super_secret_jwt_key_for_idealize_2025
 GOOGLE_API_KEY=your_google_gemini_api_key
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
+EMAIL_USER=jayawardhanasandali2@gmail.com
+EMAIL_PASS=Sandali123
 FRONTEND_URL=http://localhost:3001
 ```
 
