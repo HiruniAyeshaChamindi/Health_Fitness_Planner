@@ -51,6 +51,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+// app.use('/api', coachRoutes); // Add coach routes
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
