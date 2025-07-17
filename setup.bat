@@ -31,7 +31,7 @@ if not exist .env (
     echo EMAIL_PORT=587 >> .env
     echo EMAIL_USER=your_email@gmail.com >> .env
     echo EMAIL_PASS=your_app_password >> .env
-    echo FRONTEND_URL=http://localhost:3000 >> .env
+    echo FRONTEND_URL=http://localhost:3001 >> .env
 )
 
 echo 📦 Installing frontend dependencies...
