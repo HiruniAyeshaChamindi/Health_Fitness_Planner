@@ -98,7 +98,7 @@ const Chatbot = () => {
         const botMessage = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-          content: response.data.response,
+          content: response.data.message || response.data.response || "I received your message but couldn't generate a proper response.",
           timestamp: new Date().toISOString(),
           suggestions: response.data.suggestions || []
         };
@@ -142,6 +142,11 @@ const Chatbot = () => {
   };
 
   const formatMessage = (content) => {
+    // Check if content is defined and is a string
+    if (!content || typeof content !== 'string') {
+      return 'Message content is not available.';
+    }
+    
     // Simple markdown-like formatting
     return content
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

@@ -322,12 +322,84 @@ class AIService {
     `;
 
     try {
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
+      // Check if API key is configured
+      if (!process.env.GOOGLE_API_KEY || process.env.GOOGLE_API_KEY === 'YOUR_ACTUAL_GEMINI_API_KEY_HERE') {
+        return "I'm currently not configured properly. Please check the API key configuration.";
+      }
+
+      // Try Google Gemini first
+      if (process.env.GOOGLE_API_KEY.startsWith('AIza')) {
+        const result = await this.model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+      } 
+      // If it's an OpenRouter key, use OpenRouter API
+      else if (process.env.GOOGLE_API_KEY.startsWith('sk-or-')) {
+        return await this.generateOpenRouterResponse(prompt);
+      }
+      // If API is not working, provide a helpful fallback response
+      else {
+        return this.generateFallbackResponse(message, userContext);
+      }
     } catch (error) {
       console.error('Error generating chatbot response:', error);
-      return "I'm sorry, I'm having trouble processing your request right now. Please try again later.";
+      return this.generateFallbackResponse(message, userContext);
+    }
+  }
+
+  // Fallback response generator for when AI services are unavailable
+  generateFallbackResponse(message, userContext) {
+    const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
+    const motivation = ['motivat', 'inspire', 'encourage'];
+    const workout = ['workout', 'exercise', 'training', 'fitness'];
+    const diet = ['diet', 'nutrition', 'food', 'meal', 'eat'];
+    
+    const lowerMessage = message.toLowerCase();
+    
+    if (greetings.some(word => lowerMessage.includes(word))) {
+      return `Hello! 👋 I'm FitGenie, your AI fitness assistant. I'm here to help you with workouts, nutrition advice, and motivation to reach your fitness goals. How can I support your wellness journey today?`;
+    }
+    
+    if (motivation.some(word => lowerMessage.includes(word))) {
+      return `🌟 Remember, every small step counts! Whether it's choosing the stairs over the elevator or drinking an extra glass of water, you're making progress. Your fitness journey is unique to you, and consistency beats perfection every time. Keep going - you've got this! 💪`;
+    }
+    
+    if (workout.some(word => lowerMessage.includes(word))) {
+      return `🏋️‍♂️ Here's a quick tip: Start with bodyweight exercises like push-ups, squats, and planks. Aim for 15-20 minutes of activity daily. Remember to warm up before and cool down after your workout. Listen to your body and gradually increase intensity as you get stronger!`;
+    }
+    
+    if (diet.some(word => lowerMessage.includes(word))) {
+      return `🥗 Focus on whole foods: lean proteins, colorful vegetables, fruits, whole grains, and healthy fats. Stay hydrated with plenty of water throughout the day. A balanced plate typically includes 1/2 vegetables, 1/4 protein, and 1/4 complex carbs. Small, consistent changes lead to lasting results!`;
+    }
+    
+    return `Thanks for your question! While I'm experiencing some technical difficulties connecting to my AI service right now, I'm still here to help with general fitness and wellness guidance. For specific health concerns, please consult with a healthcare professional. Is there a particular aspect of fitness or nutrition you'd like to know more about?`;
+  }
+
+  // OpenRouter API fallback method
+  async generateOpenRouterResponse(prompt) {
+    try {
+      const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+        model: 'openai/gpt-3.5-turbo', // Use a more common model
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 1000
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.GOOGLE_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'http://localhost:5000',
+          'X-Title': 'FitGenie Health Assistant'
+        }
+      });
+
+      return response.data.choices[0]?.message?.content || "I couldn't generate a proper response.";
+    } catch (error) {
+      console.error('OpenRouter API error:', error.response?.data || error.message);
+      return "I'm having trouble connecting to the AI service. Please try again later.";
     }
   }
 }
