@@ -24,7 +24,7 @@ const authReducer = (state, action) => {
     case 'LOGOUT':
       localStorage.removeItem('token');
       return {
-        ...state,
+       ...state,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -85,8 +85,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('Attempting to login user:', email);
       dispatch({ type: 'SET_LOADING', payload: true });
       const response = await authAPI.login(email, password);
+      console.log('Login response:', response);
       dispatch({ 
         type: 'LOGIN_SUCCESS', 
         payload: {
@@ -96,6 +98,8 @@ export const AuthProvider = ({ children }) => {
       });
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response);
       dispatch({ type: 'AUTH_ERROR' });
       return { 
         success: false, 
