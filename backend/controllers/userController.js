@@ -31,8 +31,13 @@ const getUserProfile = async (req, res) => {
 // Update user profile
 const updateUserProfile = async (req, res) => {
   try {
+    console.log('Profile update request received');
+    console.log('User ID:', req.user?.id);
+    console.log('Update data:', JSON.stringify(req.body, null, 2));
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({
         success: false,
         message: 'Validation errors',
@@ -46,6 +51,8 @@ const updateUserProfile = async (req, res) => {
     // Remove sensitive fields that shouldn't be updated this way
     delete updateData.password;
     delete updateData.email;
+    
+    console.log('Cleaned update data:', JSON.stringify(updateData, null, 2));
 
     const user = await User.findByIdAndUpdate(
       userId,
@@ -54,12 +61,14 @@ const updateUserProfile = async (req, res) => {
     ).select('-password');
 
     if (!user) {
+      console.log('User not found for ID:', userId);
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
 
+    console.log('Profile updated successfully for user:', user.name);
     res.json({
       success: true,
       message: 'Profile updated successfully',
