@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Dumbbell, 
   Brain, 
   Target, 
   TrendingUp, 
@@ -10,10 +9,32 @@ import {
   Smartphone,
   CheckCircle,
   Star,
-  ArrowRight
+  ArrowRight,
+  Zap
 } from 'lucide-react';
 
 const Home = () => {
+  // Array of your uploaded background images
+  const backgroundImages = [
+    '/images/image1.jpeg',
+    '/images/image2.jpeg',
+    '/images/image3.jpeg',
+    '/images/image4.jpeg'
+  ];
+
+  // State for current background image
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Auto-rotate images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        (prevIndex + 1) % backgroundImages.length
+      );
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
   const features = [
     {
       icon: <Brain className="h-8 w-8" />,
@@ -57,9 +78,45 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <>
+      <style>
+        {`
+          .hero-section {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: optimize-contrast;
+            -ms-interpolation-mode: nearest-neighbor;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            will-change: background-image;
+          }
+          
+          .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: inherit;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            filter: contrast(1.1) saturate(1.1);
+            z-index: -1;
+          }
+        `}
+      </style>
+      <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 text-white">
+      <section 
+        className="hero-section relative bg-cover bg-center bg-no-repeat text-white min-h-screen flex items-center transition-all duration-1000 ease-in-out" 
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), url('${backgroundImages[currentImageIndex]}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat'
+        }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <motion.div
@@ -93,6 +150,22 @@ const Home = () => {
               </div>
             </motion.div>
           </div>
+        </div>
+        
+        {/* Image Navigation Dots */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
+          {backgroundImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentImageIndex 
+                  ? 'bg-white scale-125' 
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Switch to image ${index + 1}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -213,7 +286,10 @@ const Home = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Dumbbell className="h-8 w-8 text-primary-500" />
+                <div className="relative">
+                  <Zap className="h-8 w-8 text-yellow-400" />
+                  <Brain className="h-4 w-4 text-primary-500 absolute -top-1 -right-1" />
+                </div>
                 <span className="text-xl font-bold">FitGenie</span>
               </div>
               <p className="text-gray-400">
@@ -245,6 +321,7 @@ const Home = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 
