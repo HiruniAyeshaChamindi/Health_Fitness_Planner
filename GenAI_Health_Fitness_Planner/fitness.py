@@ -175,3 +175,18 @@ if st.sidebar.button("Generate Health Plan"):
                 <p>Consistency is key! Keep pushing yourself, and you will see results. Your fitness journey starts now!</p>
             </div>
         """, unsafe_allow_html=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
