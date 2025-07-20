@@ -1,59 +1,61 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Menu, X, Dumbbell, User, LogOut, BarChart3, FileText, MessageCircle, ChevronDown, BookOpen, Mail, Info } from 'lucide-react';
+"use client"
+
+import React from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
+import { Menu, X, Dumbbell, User, LogOut, BarChart3, FileText, MessageCircle, ChevronDown, BookOpen, Mail, Info, Users, Calendar, Award } from "lucide-react"
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = React.useState(false);
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+  const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = React.useState(false)
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (isResourcesDropdownOpen && !event.target.closest('.resources-dropdown')) {
-        setIsResourcesDropdownOpen(false);
+        setIsResourcesDropdownOpen(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isResourcesDropdownOpen]);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isResourcesDropdownOpen])
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
-    setIsMenuOpen(false);
-  };
+    logout()
+    navigate("/")
+    setIsMenuOpen(false)
+  }
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+    setIsMenuOpen(!isMenuOpen)
+  }
 
   const toggleResourcesDropdown = () => {
-    setIsResourcesDropdownOpen(!isResourcesDropdownOpen);
-  };
+    setIsResourcesDropdownOpen(!isResourcesDropdownOpen)
+  }
 
   const closeDropdowns = () => {
-    setIsResourcesDropdownOpen(false);
-  };
+    setIsResourcesDropdownOpen(false)
+  }
 
   const NavLink = ({ to, children, onClick }) => (
     <Link
       to={to}
       onClick={() => {
-        setIsMenuOpen(false);
-        closeDropdowns();
-        onClick && onClick();
+        setIsMenuOpen(false)
+        closeDropdowns()
+        onClick && onClick()
       }}
       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
     >
       {children}
     </Link>
-  );
+  )
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -72,6 +74,14 @@ const Navbar = () => {
             <NavLink to="/">Home</NavLink>
             <NavLink to="/chatbot">AI Assistant</NavLink>
             
+            {/* Find Coaches Link */}
+            <NavLink to="/coaches">
+              <div className="flex items-center space-x-1">
+                <Users className="h-4 w-4" />
+                <span>Find Coaches</span>
+              </div>
+            </NavLink>
+
             {/* Resources Dropdown */}
             <div className="relative resources-dropdown">
               <button
@@ -119,9 +129,43 @@ const Navbar = () => {
               <>
                 <NavLink to="/dashboard">Dashboard</NavLink>
                 <NavLink to="/generate-plan">Generate Plan</NavLink>
-                <NavLink to="/my-plans">My Plans</NavLink>
                 <NavLink to="/progress">Progress</NavLink>
-                
+
+                {/* Coaching Menu */}
+                <div className="relative group">
+                  <button className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Coaching</span>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="py-1">
+                      <Link
+                        to="/dashboard/requests"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        My Requests
+                      </Link>
+                      <Link
+                        to="/dashboard/coaching"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Active Coaching
+                      </Link>
+                      <Link
+                        to="/become-coach"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Award className="h-4 w-4 mr-2" />
+                        Become a Coach
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
                 {/* User Menu */}
                 <div className="relative ml-3">
                   <div className="flex items-center space-x-2">
@@ -145,10 +189,7 @@ const Navbar = () => {
             ) : (
               <>
                 <NavLink to="/login">Login</NavLink>
-                <Link
-                  to="/register"
-                  className="btn-primary btn-md"
-                >
+                <Link to="/register" className="btn-primary btn-md">
                   Get Started
                 </Link>
               </>
@@ -174,6 +215,14 @@ const Navbar = () => {
             <NavLink to="/">Home</NavLink>
             <NavLink to="/chatbot">AI Assistant</NavLink>
             
+            {/* Find Coaches Link for Mobile */}
+            <NavLink to="/coaches">
+              <div className="flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span>Find Coaches</span>
+              </div>
+            </NavLink>
+
             {/* Mobile Resources Section */}
             <div className="border-t pt-2 mt-2">
               <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
@@ -208,20 +257,38 @@ const Navbar = () => {
                   </div>
                 </NavLink>
                 <NavLink to="/generate-plan">Generate Plan</NavLink>
-                <NavLink to="/my-plans">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4" />
-                    <span>My Plans</span>
-                  </div>
-                </NavLink>
                 <NavLink to="/progress">Progress</NavLink>
+
+                {/* Coaching Section */}
+                <div className="border-t pt-2 mt-2">
+                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Coaching</div>
+                  <NavLink to="/dashboard/requests">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>My Requests</span>
+                    </div>
+                  </NavLink>
+                  <NavLink to="/dashboard/coaching">
+                    <div className="flex items-center space-x-2">
+                      <MessageCircle className="h-4 w-4" />
+                      <span>Active Coaching</span>
+                    </div>
+                  </NavLink>
+                  <NavLink to="/become-coach">
+                    <div className="flex items-center space-x-2">
+                      <Award className="h-4 w-4" />
+                      <span>Become a Coach</span>
+                    </div>
+                  </NavLink>
+                </div>
+
                 <NavLink to="/profile">
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4" />
                     <span>Profile</span>
                   </div>
                 </NavLink>
-                
+
                 <div className="border-t pt-2">
                   <button
                     onClick={handleLogout}
@@ -242,7 +309,7 @@ const Navbar = () => {
         </div>
       )}
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

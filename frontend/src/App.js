@@ -1,10 +1,11 @@
+//**********After Coaching Features */
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import LoadingSpinner from './components/LoadingSpinner';
 
-// Pages
+// Existing pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -17,6 +18,15 @@ import Profile from './pages/Profile';
 import Contact from './pages/Contact';
 import Blog from './pages/Blog';
 import About from './pages/About';
+
+// New coaching pages
+import CoachDiscovery from './pages/CoachDiscovery';
+import CoachProfile from './pages/CoachProfile';
+import CoachingRequest from './pages/CoachingRequest';
+import UserRequests from './pages/UserRequests';
+import ActiveCoaching from './pages/ActiveCoaching';
+import BecomeCoach from './pages/BecomeCoach';
+import CoachDashboard from './pages/CoachDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -74,8 +84,20 @@ function App() {
               </PublicRoute>
             } 
           />
-          
-          {/* Protected Routes */}
+
+          {/* Coach discovery - public */}
+          <Route path="/coaches" element={<CoachDiscovery />} />
+          <Route path="/coaches/:id" element={<CoachProfile />} />
+
+          {/* Chatbot - accessible to all */}
+          <Route path="/chatbot" element={<Chatbot />} />
+
+          {/* Resources Pages - accessible to all */}
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/about" element={<About />} />
+
+          {/* Protected Routes - Main App */}
           <Route 
             path="/dashboard" 
             element={
@@ -116,15 +138,49 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
-          {/* Chatbot - accessible to all */}
-          <Route path="/chatbot" element={<Chatbot />} />
-          
-          {/* Resources Pages - accessible to all */}
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/about" element={<About />} />
-          
+
+          {/* Coaching Routes - Protected */}
+          <Route 
+            path="/coaches/:id/request" 
+            element={
+              <ProtectedRoute>
+                <CoachingRequest />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/requests" 
+            element={
+              <ProtectedRoute>
+                <UserRequests />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/coaching" 
+            element={
+              <ProtectedRoute>
+                <ActiveCoaching />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/become-coach" 
+            element={
+              <ProtectedRoute>
+                <BecomeCoach />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/coach-dashboard" 
+            element={
+              <ProtectedRoute>
+                <CoachDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
