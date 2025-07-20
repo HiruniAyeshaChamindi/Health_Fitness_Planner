@@ -17,8 +17,7 @@ const Register = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    watch
+    formState: { errors }
   } = useForm({ mode: 'onChange' }); // Validate on change for immediate feedback
 
   const onSubmit = async (data) => {
