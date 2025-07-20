@@ -1,102 +1,233 @@
-// const Coach = require('../models/Coach');
-// const Appointment = require('../models/Appointment');
-// const { body, validationResult } = require('express-validator');
+const Coach = require("../models/Coach")
+const CoachRequest = require("../models/CoachRequest")
+const CoachReview = require("../models/CoachReview")
+const User = require("../models/User")
 
-// // Get all coaches
-// exports.getCoaches = async (req, res) => {
-//   try {
-//     const coaches = await Coach.find().select('name specialty bio availability');
-//     res.status(200).json({ success: true, data: coaches });
-//   } catch (error) {
-//     console.error('Error fetching coaches:', error);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
+// Get all coaches with filtering
+exports.getCoaches = async (req, res) => {
+  try {
+    const { specialty, minRating, language, verified, search, page = 1, limit = 12 } = req.query
 
-// // Create a coach (admin-only, for seeding or admin panel)
-// exports.createCoach = [
-//   body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters'),
-//   body('specialty').isIn(['weight_loss', 'muscle_gain', 'endurance', 'flexibility', 'general_fitness']).withMessage('Invalid specialty'),
-//   body('bio').optional().trim().isLength({ max: 500 }).withMessage('Bio must be less than 500 characters'),
-//   body('availability').isArray().withMessage('Availability must be an array'),
-//   async (req, res) => {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({ success: false, message: 'Validation errors', errors: errors.array() });
-//     }
+    const filter = { isActive: true }
 
-//     try {
-//       const coach = new Coach(req.body);
-//       await coach.save();
-//       res.status(201).json({ success: true, message: 'Coach created', data: coach });
-//     } catch (error) {
-//       console.error('Error creating coach:', error);
-//       res.status(500).json({ success: false, message: 'Server error' });
-//     }
-//   }
-// ];
+    if (specialty) {
+      filter.specialties = { $in: [specialty] }
+    }
 
-// // Book an appointment
-// exports.bookAppointment = [
-//   body('coachId').isMongoId().withMessage('Invalid coach ID'),
-//   body('date').isISO8601().toDate().withMessage('Invalid date'),
-//   body('time').notEmpty().withMessage('Time is required'),
-//   async (req, res) => {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({ success: false, message: 'Validation errors', errors: errors.array() });
-//     }
+    if (minRating) {
+      filter.rating = { $gte: Number.parseFloat(minRating) }
+    }
 
-//     try {
-//       const { coachId, date, time } = req.body;
-//       const coach = await Coach.findById(coachId);
-//       if (!coach) {
-//         return res.status(404).json({ success: false, message: 'Coach not found' });
-//       }
+    if (language) {
+      filter.languages = { $in: [language] }
+    }
 
-//       // Check if time slot is available
-//       const availability = coach.availability.find(slot => 
-//         slot.date.toISOString().split('T')[0] === new Date(date).toISOString().split('T')[0] && slot.timeSlots.includes(time)
-//       );
-//       if (!availability) {
-//         return res.status(400).json({ success: false, message: 'Time slot not available' });
-//       }
+    if (verified === "true") {
+      filter.verified = true
+    }
 
-//       const appointment = new Appointment({
-//         user: req.user.id, // From JWT middleware
-//         coach: coachId,
-//         date,
-//         time
-//       });
-//       await appointment.save();
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { bio: { $regex: search, $options: "i" } },
+        { specialties: { $in: [new RegExp(search, "i")] } },
+      ]
+    }
 
-//       // Update user's appointments
-//       await User.findByIdAndUpdate(req.user.id, { $push: { appointments: appointment._id } });
+    const coaches = await Coach.find(filter)
+      .populate("userId", "name email")
+      .sort({ rating: -1, totalReviews: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
 
-//       // Remove booked time slot
-//       await Coach.findByIdAndUpdate(coachId, {
-//         $pull: { 'availability.$[day].timeSlots': time },
-//       }, {
-//         arrayFilters: [{ 'day.date': new Date(date) }]
-//       });
+    const total = await Coach.countDocuments(filter)
 
-//       res.status(201).json({ success: true, message: 'Appointment booked', data: appointment });
-//     } catch (error) {
-//       console.error('Error booking appointment:', error);
-//       res.status(500).json({ success: false, message: 'Server error' });
-//     }
-//   }
-// ];
+    res.json({
+      coaches,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total,
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
 
-// // Get user's appointments
-// exports.getUserAppointments = async (req, res) => {
-//   try {
-//     const appointments = await Appointment.find({ user: req.user.id })
-//       .populate('coach', 'name specialty')
-//       .sort({ date: 1 });
-//     res.status(200).json({ success: true, data: appointments });
-//   } catch (error) {
-//     console.error('Error fetching appointments:', error);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
+// Get single coach profile
+exports.getCoachProfile = async (req, res) => {
+  try {
+    const coach = await Coach.findById(req.params.id).populate("userId", "name email")
+
+    if (!coach) {
+      return res.status(404).json({ message: "Coach not found" })
+    }
+
+    // Get recent reviews
+    const reviews = await CoachReview.find({ coachId: coach._id })
+      .populate("userId", "name")
+      .sort({ createdAt: -1 })
+      .limit(10)
+
+    res.json({ coach, reviews })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Create coach profile
+exports.createCoachProfile = async (req, res) => {
+  try {
+    const { name, bio, specialties, certifications, experienceYears, languages, availability, pricing } = req.body
+
+    // Check if user already has a coach profile
+    const existingCoach = await Coach.findOne({ userId: req.user.id })
+    if (existingCoach) {
+      return res.status(400).json({ message: "Coach profile already exists" })
+    }
+
+    const coach = new Coach({
+      userId: req.user.id,
+      name,
+      bio,
+      specialties,
+      certifications,
+      experienceYears,
+      languages,
+      availability,
+      pricing,
+    })
+
+    await coach.save()
+    res.status(201).json(coach)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Update coach profile
+exports.updateCoachProfile = async (req, res) => {
+  try {
+    const coach = await Coach.findOne({ userId: req.user.id })
+    if (!coach) {
+      return res.status(404).json({ message: "Coach profile not found" })
+    }
+
+    Object.assign(coach, req.body)
+    await coach.save()
+
+    res.json(coach)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Request coaching
+exports.requestCoaching = async (req, res) => {
+  try {
+    const { coachId, message, goals, preferredSchedule, planType } = req.body
+
+    // Check if coach exists
+    const coach = await Coach.findById(coachId)
+    if (!coach) {
+      return res.status(404).json({ message: "Coach not found" })
+    }
+
+    // Check if user already has a pending/active request with this coach
+    const existingRequest = await CoachRequest.findOne({
+      userId: req.user.id,
+      coachId,
+      status: { $in: ["pending", "accepted"] },
+    })
+
+    if (existingRequest) {
+      return res.status(400).json({
+        message: "You already have an active request with this coach",
+      })
+    }
+
+    const request = new CoachRequest({
+      userId: req.user.id,
+      coachId,
+      message,
+      goals,
+      preferredSchedule,
+      planType,
+    })
+
+    await request.save()
+
+    // Populate the request for response
+    await request.populate("userId", "name email")
+    await request.populate("coachId", "name")
+
+    res.status(201).json(request)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Get coach requests (for coaches)
+exports.getCoachRequests = async (req, res) => {
+  try {
+    const coach = await Coach.findOne({ userId: req.user.id })
+    if (!coach) {
+      return res.status(404).json({ message: "Coach profile not found" })
+    }
+
+    const requests = await CoachRequest.find({ coachId: coach._id })
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 })
+
+    res.json(requests)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Respond to coaching request
+exports.respondToRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params
+    const { status, responseMessage, startDate, endDate } = req.body
+
+    const coach = await Coach.findOne({ userId: req.user.id })
+    if (!coach) {
+      return res.status(404).json({ message: "Coach profile not found" })
+    }
+
+    const request = await CoachRequest.findOne({
+      _id: requestId,
+      coachId: coach._id,
+    })
+
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" })
+    }
+
+    request.status = status
+    request.responseMessage = responseMessage
+    if (startDate) request.startDate = startDate
+    if (endDate) request.endDate = endDate
+
+    await request.save()
+
+    await request.populate("userId", "name email")
+
+    res.json(request)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Get user's coaching requests
+exports.getUserRequests = async (req, res) => {
+  try {
+    const requests = await CoachRequest.find({ userId: req.user.id })
+      .populate("coachId", "name profilePic rating")
+      .sort({ createdAt: -1 })
+
+    res.json(requests)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
