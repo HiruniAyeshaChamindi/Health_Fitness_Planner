@@ -1861,3 +1861,609 @@ ${generatedPlan.lifestyle_tips?.map((tip, i) => `${i + 1}. ${tip}`).join("\n")}
 }
 
 export default PlanGenerator
+
+
+
+
+//***********************API Fetched */
+// import React, { useState, useEffect } from 'react';
+// import { motion } from 'framer-motion';
+// import { useAuth } from '../contexts/AuthContext';
+// import LoadingSpinner from '../components/LoadingSpinner';
+// import toast from 'react-hot-toast';
+// import { 
+//   Wand2, 
+//   Target, 
+//   Clock, 
+//   Utensils, 
+//   Dumbbell,
+//   CheckCircle,
+//   Download,
+//   Mail,
+//   Sparkles,
+//   User,
+//   Scale,
+//   Ruler,
+//   Activity
+// } from 'lucide-react';
+
+// // API configuration
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// const GOOGLE_API_KEY = "AIzaSyCr35hxFrpVsbNWgqOwU6PwmkpwLmO2dJA"; // Your API key
+
+// // API service functions
+// const fitnessAPI = {
+//   generateMealPlan: async (userData) => {
+//     const response = await fetch(`${API_BASE_URL}/generate-meal-plan`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${GOOGLE_API_KEY}`,
+//       },
+//       body: JSON.stringify(userData),
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error('Failed to generate meal plan');
+//     }
+    
+//     return response.json();
+//   },
+
+//   generateFitnessPlan: async (userData) => {
+//     const response = await fetch(`${API_BASE_URL}/generate-fitness-plan`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${GOOGLE_API_KEY}`,
+//       },
+//       body: JSON.stringify(userData),
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error('Failed to generate fitness plan');
+//     }
+    
+//     return response.json();
+//   },
+
+//   generateFullHealthPlan: async (userData) => {
+//     const response = await fetch(`${API_BASE_URL}/generate-full-health-plan`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${GOOGLE_API_KEY}`,
+//       },
+//       body: JSON.stringify(userData),
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error('Failed to generate full health plan');
+//     }
+    
+//     return response.json();
+//   },
+
+//   downloadPDF: async (planData) => {
+//     const response = await fetch(`${API_BASE_URL}/download-pdf`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${GOOGLE_API_KEY}`,
+//       },
+//       body: JSON.stringify(planData),
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error('Failed to download PDF');
+//     }
+    
+//     return response.blob();
+//   },
+
+//   emailPlan: async (planData, email) => {
+//     const response = await fetch(`${API_BASE_URL}/email-plan`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${GOOGLE_API_KEY}`,
+//       },
+//       body: JSON.stringify({ ...planData, email }),
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error('Failed to email plan');
+//     }
+    
+//     return response.json();
+//   }
+// };
+
+// const PlanGenerator = () => {
+//   const { user } = useAuth();
+//   const [isGenerating, setIsGenerating] = useState(false);
+//   const [generatedPlan, setGeneratedPlan] = useState(null);
+//   const [generationStep, setGenerationStep] = useState('');
+  
+//   // User input states
+//   const [userInputs, setUserInputs] = useState({
+//     name: user?.name || '',
+//     age: user?.age || 25,
+//     weight: user?.weight || 70,
+//     height: user?.height || 170,
+//     activity_level: user?.activityLevel || 'Moderate',
+//     dietary_preference: user?.dietaryPreference || 'Balanced',
+//     fitness_goal: user?.fitnessGoal || 'Weight Loss'
+//   });
+
+//   const [customPreferences, setCustomPreferences] = useState({
+//     workoutFocus: '',
+//     mealComplexity: '',
+//     specialRequests: ''
+//   });
+
+//   useEffect(() => {
+//     if (user) {
+//       setUserInputs(prev => ({
+//         ...prev,
+//         name: user.name || prev.name,
+//         age: user.age || prev.age,
+//         weight: user.weight || prev.weight,
+//         height: user.height || prev.height,
+//         activity_level: user.activityLevel || prev.activity_level,
+//         dietary_preference: user.dietaryPreference || prev.dietary_preference,
+//         fitness_goal: user.fitnessGoal || prev.fitness_goal
+//       }));
+//     }
+//   }, [user]);
+
+//   const handleInputChange = (field, value) => {
+//     setUserInputs(prev => ({
+//       ...prev,
+//       [field]: value
+//     }));
+//   };
+
+//   const handleGeneratePlan = async () => {
+//     if (!userInputs.name || !userInputs.age || !userInputs.weight || !userInputs.height) {
+//       toast.error('Please fill in all required fields');
+//       return;
+//     }
+
+//     setIsGenerating(true);
+//     setGenerationStep('Initializing...');
+
+//     try {
+//       // Step 1: Generate meal plan
+//       setGenerationStep('Creating your personalized meal plan...');
+//       const mealPlanData = {
+//         ...userInputs,
+//         customPreferences: customPreferences.mealComplexity ? { complexity: customPreferences.mealComplexity } : {}
+//       };
+//       const mealPlan = await fitnessAPI.generateMealPlan(mealPlanData);
+
+//       // Step 2: Generate fitness plan
+//       setGenerationStep('Designing your workout routine...');
+//       const fitnessPlanData = {
+//         ...userInputs,
+//         customPreferences: customPreferences.workoutFocus ? { focus: customPreferences.workoutFocus } : {}
+//       };
+//       const fitnessPlan = await fitnessAPI.generateFitnessPlan(fitnessPlanData);
+
+//       // Step 3: Generate combined health plan
+//       setGenerationStep('Integrating your complete health strategy...');
+//       const fullHealthPlanData = {
+//         ...userInputs,
+//         meal_plan: mealPlan,
+//         fitness_plan: fitnessPlan,
+//         special_requests: customPreferences.specialRequests
+//       };
+//       const fullHealthPlan = await fitnessAPI.generateFullHealthPlan(fullHealthPlanData);
+
+//       setGeneratedPlan({
+//         ...fullHealthPlan,
+//         meal_plan: mealPlan,
+//         workout_plan: fitnessPlan,
+//         user_info: userInputs
+//       });
+
+//       toast.success('Your personalized health plan has been generated!');
+//     } catch (error) {
+//       console.error('Error generating plan:', error);
+//       toast.error(`Failed to generate plan: ${error.message}`);
+//     } finally {
+//       setIsGenerating(false);
+//       setGenerationStep('');
+//     }
+//   };
+
+//   const handleDownloadPDF = async () => {
+//     if (!generatedPlan) return;
+    
+//     try {
+//       toast.loading('Preparing your PDF...');
+//       const blob = await fitnessAPI.downloadPDF(generatedPlan);
+//       const url = window.URL.createObjectURL(blob);
+//       const a = document.createElement('a');
+//       a.href = url;
+//       a.download = `${userInputs.name.replace(/\s+/g, '_')}_Health_Plan.pdf`;
+//       document.body.appendChild(a);
+//       a.click();
+//       window.URL.revokeObjectURL(url);
+//       document.body.removeChild(a);
+//       toast.dismiss();
+//       toast.success('Plan downloaded successfully!');
+//     } catch (error) {
+//       console.error('Error downloading PDF:', error);
+//       toast.dismiss();
+//       toast.error('Failed to download PDF. Please try again.');
+//     }
+//   };
+
+//   const handleEmailPlan = async () => {
+//     if (!generatedPlan) return;
+    
+//     try {
+//       toast.loading('Sending email...');
+//       await fitnessAPI.emailPlan(generatedPlan, user?.email || userInputs.email);
+//       toast.dismiss();
+//       toast.success('Plan sent to your email!');
+//     } catch (error) {
+//       console.error('Error emailing plan:', error);
+//       toast.dismiss();
+//       toast.error('Failed to email plan. Please try again.');
+//     }
+//   };
+
+//   if (!user) {
+//     return <LoadingSpinner />;
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 py-8">
+//       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+//         {/* Header */}
+//         <motion.div
+//           initial={{ opacity: 0, y: 20 }}
+//           animate={{ opacity: 1, y: 0 }}
+//           className="text-center mb-8"
+//         >
+//           <div className="flex items-center justify-center mb-4">
+//             <Wand2 className="h-10 w-10 text-orange-500 mr-3" />
+//             <h1 className="text-4xl font-bold text-gray-900">🏋️‍♂️ AI Health & Fitness Plan Generator</h1>
+//           </div>
+//           <p className="text-xl text-gray-600">
+//             Personalized fitness and nutrition plans to help you achieve your health goals!
+//           </p>
+//         </motion.div>
+
+//         {!generatedPlan ? (
+//           <motion.div
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             transition={{ delay: 0.1 }}
+//             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+//           >
+//             {/* Input Form */}
+//             <div className="lg:col-span-2 space-y-6">
+//               {/* Personal Information */}
+//               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+//                 <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+//                   <User className="h-6 w-6 mr-3 text-blue-600" />
+//                   Personal Information
+//                 </h2>
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2">
+//                       Full Name *
+//                     </label>
+//                     <input
+//                       type="text"
+//                       value={userInputs.name}
+//                       onChange={(e) => handleInputChange('name', e.target.value)}
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                       placeholder="Enter your name"
+//                       required
+//                     />
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2">
+//                       Age (years) *
+//                     </label>
+//                     <input
+//                       type="number"
+//                       value={userInputs.age}
+//                       onChange={(e) => handleInputChange('age', parseInt(e.target.value) || 0)}
+//                       min="10"
+//                       max="100"
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                       required
+//                     />
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+//                       <Scale className="h-4 w-4 mr-1" />
+//                       Weight (kg) *
+//                     </label>
+//                     <input
+//                       type="number"
+//                       value={userInputs.weight}
+//                       onChange={(e) => handleInputChange('weight', parseInt(e.target.value) || 0)}
+//                       min="30"
+//                       max="200"
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                       required
+//                     />
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+//                       <Ruler className="h-4 w-4 mr-1" />
+//                       Height (cm) *
+//                     </label>
+//                     <input
+//                       type="number"
+//                       value={userInputs.height}
+//                       onChange={(e) => handleInputChange('height', parseInt(e.target.value) || 0)}
+//                       min="100"
+//                       max="250"
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                       required
+//                     />
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Fitness Goals */}
+//               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+//                 <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+//                   <Target className="h-6 w-6 mr-3 text-green-600" />
+//                   Fitness Preferences
+//                 </h2>
+//                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+//                       <Activity className="h-4 w-4 mr-1" />
+//                       Activity Level
+//                     </label>
+//                     <select
+//                       value={userInputs.activity_level}
+//                       onChange={(e) => handleInputChange('activity_level', e.target.value)}
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+//                     >
+//                       <option value="Low">Low</option>
+//                       <option value="Moderate">Moderate</option>
+//                       <option value="High">High</option>
+//                     </select>
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+//                       <Utensils className="h-4 w-4 mr-1" />
+//                       Dietary Preference
+//                     </label>
+//                     <select
+//                       value={userInputs.dietary_preference}
+//                       onChange={(e) => handleInputChange('dietary_preference', e.target.value)}
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+//                     >
+//                       <option value="Keto">Keto</option>
+//                       <option value="Vegetarian">Vegetarian</option>
+//                       <option value="Low Carb">Low Carb</option>
+//                       <option value="Balanced">Balanced</option>
+//                     </select>
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+//                       <Dumbbell className="h-4 w-4 mr-1" />
+//                       Fitness Goal
+//                     </label>
+//                     <select
+//                       value={userInputs.fitness_goal}
+//                       onChange={(e) => handleInputChange('fitness_goal', e.target.value)}
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+//                     >
+//                       <option value="Weight Loss">Weight Loss</option>
+//                       <option value="Muscle Gain">Muscle Gain</option>
+//                       <option value="Endurance">Endurance</option>
+//                       <option value="Flexibility">Flexibility</option>
+//                     </select>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Custom Preferences */}
+//               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+//                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Custom Preferences (Optional)</h2>
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2">
+//                       Workout Focus
+//                     </label>
+//                     <select
+//                       value={customPreferences.workoutFocus}
+//                       onChange={(e) => setCustomPreferences({...customPreferences, workoutFocus: e.target.value})}
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+//                     >
+//                       <option value="">Default</option>
+//                       <option value="upper_body">Upper Body</option>
+//                       <option value="lower_body">Lower Body</option>
+//                       <option value="core">Core</option>
+//                       <option value="cardio">Cardio</option>
+//                       <option value="full_body">Full Body</option>
+//                     </select>
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-medium text-gray-700 mb-2">
+//                       Meal Complexity
+//                     </label>
+//                     <select
+//                       value={customPreferences.mealComplexity}
+//                       onChange={(e) => setCustomPreferences({...customPreferences, mealComplexity: e.target.value})}
+//                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+//                     >
+//                       <option value="">Default</option>
+//                       <option value="simple">Simple (15 min prep)</option>
+//                       <option value="moderate">Moderate (30 min prep)</option>
+//                       <option value="complex">Complex (45+ min prep)</option>
+//                     </select>
+//                   </div>
+//                 </div>
+//                 <div className="mt-4">
+//                   <label className="block text-sm font-medium text-gray-700 mb-2">
+//                     Special Requests
+//                   </label>
+//                   <textarea
+//                     value={customPreferences.specialRequests}
+//                     onChange={(e) => setCustomPreferences({...customPreferences, specialRequests: e.target.value})}
+//                     placeholder="Any specific requests or requirements..."
+//                     className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+//                     rows="3"
+//                   />
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Profile Summary & Generate Button */}
+//             <div className="space-y-6">
+//               {/* Current Profile Summary */}
+//               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 sticky top-8">
+//                 <h3 className="text-xl font-semibold text-gray-900 mb-4">🏃‍♂️ Your Profile</h3>
+//                 <div className="space-y-3 text-sm">
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Name:</span>
+//                     <span className="font-medium">{userInputs.name || 'Not set'}</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Age:</span>
+//                     <span className="font-medium">{userInputs.age} years</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Weight:</span>
+//                     <span className="font-medium">{userInputs.weight} kg</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Height:</span>
+//                     <span className="font-medium">{userInputs.height} cm</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Activity:</span>
+//                     <span className="font-medium">{userInputs.activity_level}</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Diet:</span>
+//                     <span className="font-medium">{userInputs.dietary_preference}</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-gray-600">Goal:</span>
+//                     <span className="font-medium">{userInputs.fitness_goal}</span>
+//                   </div>
+//                 </div>
+
+//                 {/* Generate Button */}
+//                 <button
+//                   onClick={handleGeneratePlan}
+//                   disabled={isGenerating || !userInputs.name || !userInputs.age || !userInputs.weight || !userInputs.height}
+//                   className="w-full mt-6 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
+//                 >
+//                   {isGenerating ? (
+//                     <>
+//                       <LoadingSpinner size="sm" className="mr-3" />
+//                       <div className="text-center">
+//                         <div>Generating...</div>
+//                         <div className="text-xs mt-1 opacity-90">{generationStep}</div>
+//                       </div>
+//                     </>
+//                   ) : (
+//                     <>
+//                       <Sparkles className="h-6 w-6 mr-3" />
+//                       Generate Health Plan
+//                     </>
+//                   )}
+//                 </button>
+//                 <p className="text-xs text-gray-500 mt-2 text-center">
+//                   This usually takes 30-45 seconds
+//                 </p>
+//               </div>
+//             </div>
+//           </motion.div>
+//         ) : (
+//           <motion.div
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             className="space-y-8"
+//           >
+//             {/* Success Header */}
+//             <div className="text-center">
+//               <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+//                 <CheckCircle className="h-10 w-10 text-green-600" />
+//               </div>
+//               <h2 className="text-3xl font-bold text-gray-900 mb-2">🏆 Plan Generated Successfully!</h2>
+//               <p className="text-lg text-gray-600">
+//                 Hello {userInputs.name}! Your personalized health & fitness plan is ready.
+//               </p>
+//             </div>
+
+//             {/* Generated Plan Display */}
+//             <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+//               <div className="prose max-w-none">
+//                 <div className="whitespace-pre-wrap">{generatedPlan.content || 'Plan generated successfully! Your comprehensive health plan has been created based on your profile.'}</div>
+//               </div>
+
+//               {/* AI Recommendations */}
+//               {generatedPlan.ai_recommendations && (
+//                 <div className="mt-8 bg-blue-50 rounded-lg p-6">
+//                   <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+//                     <Sparkles className="h-5 w-5 mr-2" />
+//                     AI Recommendations
+//                   </h4>
+//                   <p className="text-blue-800">{generatedPlan.ai_recommendations}</p>
+//                 </div>
+//               )}
+//             </div>
+
+//             {/* Action Buttons */}
+//             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+//               <button
+//                 onClick={handleDownloadPDF}
+//                 className="inline-flex items-center px-8 py-4 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-all transform hover:scale-105"
+//               >
+//                 <Download className="h-5 w-5 mr-3" />
+//                 Download PDF
+//               </button>
+//               <button
+//                 onClick={handleEmailPlan}
+//                 className="inline-flex items-center px-8 py-4 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all transform hover:scale-105"
+//               >
+//                 <Mail className="h-5 w-5 mr-3" />
+//                 Email Plan
+//               </button>
+//               <button
+//                 onClick={() => {
+//                   setGeneratedPlan(null);
+//                   setCustomPreferences({ workoutFocus: '', mealComplexity: '', specialRequests: '' });
+//                 }}
+//                 className="inline-flex items-center px-8 py-4 bg-gray-600 text-white font-medium rounded-xl hover:bg-gray-700 transition-all transform hover:scale-105"
+//               >
+//                 <Wand2 className="h-5 w-5 mr-3" />
+//                 Generate New Plan
+//               </button>
+//             </div>
+
+//             {/* Motivational Message */}
+//             <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-6 text-center">
+//               <h4 className="text-xl font-bold text-gray-900 mb-2">🏆 Stay Focused, Stay Fit!</h4>
+//               <p className="text-gray-700">
+//                 Consistency is key! Keep pushing yourself, and you will see results. Your fitness journey starts now!
+//               </p>
+//             </div>
+//           </motion.div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default PlanGenerator;
+
+
+
+
