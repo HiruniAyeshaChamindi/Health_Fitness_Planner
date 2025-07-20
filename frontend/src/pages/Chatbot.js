@@ -56,17 +56,15 @@ const Chatbot = () => {
 
   useEffect(() => {
     // Welcome message
-    const welcomeMessage = {
-      id: '1',
-      type: 'bot',
-      content: `Hello ${user?.name || 'there'}! 👋 I'm your AI fitness companion. I'm here to help you with nutrition advice, workout suggestions, motivation tips, and answer any health-related questions you might have. How can I assist you today?`,
-      timestamp: new Date().toISOString(),
-      suggestions: quickQuestions.map(q => q.text)
-    };
-    
-    if (validateMessage(welcomeMessage)) {
-      setMessages([welcomeMessage]);
-    }
+    setMessages([
+      {
+        id: '1',
+        type: 'bot',
+        content: `Hello ${user?.name || 'there'}! 👋 I'm your AI fitness companion. I'm here to help you with nutrition advice, workout suggestions, motivation tips, and answer any health-related questions you might have. How can I assist you today?`,
+        timestamp: new Date().toISOString(),
+        suggestions: quickQuestions.map(q => q.text)
+      }
+    ]);
   }, [user]);
 
   useEffect(() => {
@@ -83,7 +81,7 @@ const Chatbot = () => {
     const userMessage = {
       id: Date.now().toString(),
       type: 'user',
-      content: messageText || '',
+      content: messageText,
       timestamp: new Date().toISOString()
     };
 
@@ -100,21 +98,12 @@ const Chatbot = () => {
         const botMessage = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-<<<<<<< Updated upstream
-          content: response.data.response,
-=======
           content: response.data.message || response.data.response || "I received your message but couldn't generate a proper response.",
-          content: response.data.message || response.data.response || 'No response received',
->>>>>>> Stashed changes
           timestamp: new Date().toISOString(),
           suggestions: response.data.suggestions || []
         };
 
-        if (validateMessage(botMessage)) {
-          setMessages(prev => [...prev, botMessage]);
-        } else {
-          console.error('Invalid bot message:', botMessage);
-        }
+        setMessages(prev => [...prev, botMessage]);
         setIsTyping(false);
       }, 1000);
     } catch (error) {
@@ -129,9 +118,7 @@ const Chatbot = () => {
         isError: true
       };
       
-      if (validateMessage(errorMessage)) {
-        setMessages(prev => [...prev, errorMessage]);
-      }
+      setMessages(prev => [...prev, errorMessage]);
       toast.error('Failed to get response from AI assistant');
     } finally {
       setIsLoading(false);
@@ -150,36 +137,16 @@ const Chatbot = () => {
   };
 
   const copyToClipboard = (text) => {
-    if (!text || typeof text !== 'string') {
-      toast.error('No content to copy');
-      return;
-    }
     navigator.clipboard.writeText(text);
     toast.success('Message copied to clipboard!');
   };
 
-  const validateMessage = (message) => {
-    return message && 
-           typeof message === 'object' && 
-           message.id && 
-           message.type && 
-           typeof message.content === 'string';
-  };
-
   const formatMessage = (content) => {
-<<<<<<< Updated upstream
-=======
     // Check if content is defined and is a string
     if (!content || typeof content !== 'string') {
       return 'Message content is not available.';
     }
     
-    // Handle undefined or null content
-    if (!content || typeof content !== 'string') {
-      return '';
-    }
-    
->>>>>>> Stashed changes
     // Simple markdown-like formatting
     return content
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -225,7 +192,7 @@ const Chatbot = () => {
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <AnimatePresence>
-            {messages.filter(validateMessage).map((message, index) => (
+            {messages.map((message, index) => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}

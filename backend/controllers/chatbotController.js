@@ -4,10 +4,15 @@ const User = require('../models/User');
 // Handle chatbot conversation
 const chatWithBot = async (req, res) => {
   try {
+    console.log('=== Chatbot Request Received ===');
+    console.log('Request body:', req.body);
+    console.log('User ID:', req.user?.id);
+    
     const { message } = req.body;
     const userId = req.user?.id;
 
     if (!message || message.trim().length === 0) {
+      console.log('ERROR: Message is empty or missing');
       return res.status(400).json({
         success: false,
         message: 'Message is required'
@@ -25,17 +30,23 @@ const chatWithBot = async (req, res) => {
           fitnessLevel: user.fitnessLevel,
           dietaryPreference: user.dietaryPreference
         };
+        console.log('User context:', userContext);
       }
     }
 
+    console.log('Calling AI service with message:', message);
     // Generate AI response
     const response = await aiService.generateChatbotResponse(message, userContext);
+    console.log('AI service response:', response);
 
-    res.json({
+    const responseData = {
       success: true,
       message: response,
       timestamp: new Date().toISOString()
-    });
+    };
+    
+    console.log('Sending response:', responseData);
+    res.json(responseData);
 
   } catch (error) {
     console.error('Chatbot error:', error);
