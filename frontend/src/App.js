@@ -14,6 +14,9 @@ import MyPlans from './pages/MyPlans';
 import Progress from './pages/Progress';
 import Chatbot from './pages/Chatbot';
 import Profile from './pages/Profile';
+import Contact from './pages/Contact';
+import Blog from './pages/Blog';
+import About from './pages/About';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -116,6 +119,11 @@ function App() {
           
           {/* Chatbot - accessible to all */}
           <Route path="/chatbot" element={<Chatbot />} />
+          
+          {/* Resources Pages - accessible to all */}
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/about" element={<About />} />
           
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />

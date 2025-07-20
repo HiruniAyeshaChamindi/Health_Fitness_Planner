@@ -1,12 +1,27 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Menu, X, Dumbbell, User, LogOut, BarChart3, FileText, MessageCircle } from 'lucide-react';
+import { Menu, X, Dumbbell, User, LogOut, BarChart3, FileText, MessageCircle, ChevronDown, BookOpen, Mail, Info } from 'lucide-react';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = React.useState(false);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isResourcesDropdownOpen && !event.target.closest('.resources-dropdown')) {
+        setIsResourcesDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isResourcesDropdownOpen]);
 
   const handleLogout = () => {
     logout();
@@ -18,11 +33,20 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const toggleResourcesDropdown = () => {
+    setIsResourcesDropdownOpen(!isResourcesDropdownOpen);
+  };
+
+  const closeDropdowns = () => {
+    setIsResourcesDropdownOpen(false);
+  };
+
   const NavLink = ({ to, children, onClick }) => (
     <Link
       to={to}
       onClick={() => {
         setIsMenuOpen(false);
+        closeDropdowns();
         onClick && onClick();
       }}
       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -47,6 +71,49 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <NavLink to="/">Home</NavLink>
             <NavLink to="/chatbot">AI Assistant</NavLink>
+            
+            {/* Resources Dropdown */}
+            <div className="relative resources-dropdown">
+              <button
+                onClick={toggleResourcesDropdown}
+                className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Resources</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isResourcesDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isResourcesDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                  <div className="py-1">
+                    <Link
+                      to="/contact"
+                      onClick={closeDropdowns}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors"
+                    >
+                      <Mail className="h-4 w-4" />
+                      <span>Contact</span>
+                    </Link>
+                    <Link
+                      to="/blog"
+                      onClick={closeDropdowns}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span>Blog</span>
+                    </Link>
+                    <Link
+                      to="/about"
+                      onClick={closeDropdowns}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors"
+                    >
+                      <Info className="h-4 w-4" />
+                      <span>About</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
             
             {isAuthenticated ? (
               <>
@@ -106,6 +173,31 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             <NavLink to="/">Home</NavLink>
             <NavLink to="/chatbot">AI Assistant</NavLink>
+            
+            {/* Mobile Resources Section */}
+            <div className="border-t pt-2 mt-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-3 py-2">
+                Resources
+              </div>
+              <NavLink to="/contact">
+                <div className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4" />
+                  <span>Contact</span>
+                </div>
+              </NavLink>
+              <NavLink to="/blog">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Blog</span>
+                </div>
+              </NavLink>
+              <NavLink to="/about">
+                <div className="flex items-center space-x-2">
+                  <Info className="h-4 w-4" />
+                  <span>About</span>
+                </div>
+              </NavLink>
+            </div>
             
             {isAuthenticated ? (
               <>
